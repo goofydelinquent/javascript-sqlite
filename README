@@ -1,18 +1,18 @@
-A very simple Javascript layer for the web based SQLite database.
+A very simple Javascript statement builder for the SQLite databases.
 
 example usage:
 
-var db = SQLite({ shortName: 'mydb' });
+var smtBuild = new StatementBuilder();
 
-db.createTable('people', 'name TEXT, age INTEGER');
+smtBuild.createTable('people', 'name TEXT, age INTEGER');
 
-db.insert('people', { name: 'Jeremy', age: 29 });
+smtBuild.insert('people', { name: 'Jeremy', age: 29 });
 
-db.update('people', { age: 30 }, { name: 'Jeremy' });
+smtBuild.update('people', { age: 30 }, { name: 'Jeremy' });
 
-db.select('people', '*', { age: 30 }, function (results) { var x; for(x=0; x<results.rows.length; x++) { console.log(results.rows.item(x)); } });
+smtBuild.select('people', '*', { age: 30 }, function (results) { var x; for(x=0; x<results.rows.length; x++) { console.log(results.rows.item(x)); } });
 
-db.destroy('people', { age: 30 });
+smtBuild.destroy('people', { age: 30 });
 
 Conditions can be:
   * a number: defaults to 'WHERE id=number'

@@ -1,14 +1,5 @@
-function SQLite(cfg) {
-  if (typeof window.openDatabase === 'undefined') {
-    return;
-  }
-
-  function log(str) {
-    if (typeof console !== 'undefined') {
-      console.log(str);
-    }
-  }
-
+function StatementBuilder() {
+  
   function isNumber(val) {
     switch (typeof val) {
     case 'number':
@@ -18,58 +9,6 @@ function SQLite(cfg) {
     case 'object':
       return false;
     }
-  }
-
-  // Default Handlers
-  function nullDataHandler(results) { }
-
-  function errorHandler(error) {
-    log('Oops. ' + error.message + ' (Code ' + error.code + ')');
-  }
-
-  var config = cfg || {}, db;
-  
-  config.shortName = config.shortName || 'mydatabase';
-  config.version = config.version || '1.0';
-  config.displayName = config.displayName || 'My SQLite Database';
-  config.maxSize = 65536;
-  config.defaultErrorHandler = config.defaultErrorHandler || errorHandler;
-  config.defaultDataHandler = config.defaultDataHandler || nullDataHandler;
-
-  try {
-    db = openDatabase(config.shortName, config.version, config.displayName, config.maxSize);
-  } catch (e) {
-    if (e === 2) {
-      log("Invalid database version.");
-    } else {
-      log("Unknown error " + e + ".");
-    }
-
-    return;
-  }
-
-  function execute(query, v, d, e) {
-    var values = v || [],
-      dH = d || config.defaultDataHandler,
-      eH = e || config.defaultErrorHandler;
-
-    if (!query || query === '') {
-      return;
-    }
-
-    function err(t, error) {
-      eH(error, query);
-    }
-
-    function data(t, result) {
-      dH(result, query);
-    }
-
-    db.transaction(
-      function (transaction) {
-        transaction.executeSql(query, values, data, err);
-      }
-    );
   }
 
   function buildConditions(conditions) {
@@ -198,30 +137,24 @@ function SQLite(cfg) {
   }
 
   return {
-    database: db,
-    createTable: function (name, cols, data, error) {
-      var sql = createTableSQL(name, cols);
-      execute(sql[0], sql[1], data, error);
+    createTable: function (name, cols) {
+      return createTableSQL(name, cols);
+      
     },
-    dropTable: function (name, data, error) { 
-      var sql = dropTableSQL(name);
-      execute(sql[0], sql[1], data, error);
+    dropTable: function (name) { 
+      return dropTableSQL(name);
     },
-    insert: function (table, map, data, error) {
-      var sql = insertSQL(table, map);
-      execute(sql[0], sql[1], data, error);
+    insert: function (table, map) {
+      return insertSQL(table, map);
     },
-    update: function (table, map, conditions, data, error) {
-      var sql = updateSQL(table, map, conditions);
-      execute(sql[0], sql[1], data, error);
+    update: function (table, map, conditions) {
+      return updateSQL(table, map, conditions);
     },
-    select: function (table, columns, conditions, options, data, error) {
-      var sql = selectSQL(table, columns, conditions, options);
-      execute(sql[0], sql[1], data, error);
+    select: function (table, columns, conditions, options) {
+      return selectSQL(table, columns, conditions, options);
     },
-    destroy: function (table, conditions, data, error) {
-      var sql = destroySQL(table, conditions);
-      execute(sql[0], sql[1], data, error);
+    destroy: function (table, conditions) {
+      return destroySQL(table, conditions);
     }
   };
 }
